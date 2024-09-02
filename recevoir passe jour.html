@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réception des Tâches Quotidiennes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            font-size: 30px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            width: 100%;
+        }
+
+        main {
+            margin-top: 50px;
+            text-align: center;
+            width: 80%;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button i {
+            margin-right: 10px;
+        }
+
+        .day-selection {
+            margin-top: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #bdc3c7;
+            border-radius: 10px;
+        }
+
+        .result {
+            display: none;
+            margin-top: 20px;
+            background-color: white;
+            border: 5px solid red;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 18px;
+            background-color: #2980b9;
+            color: white;
+            padding: 20px;
+            width: 100%;
+            margin-top: 40px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Réception des Tâches Quotidiennes</h1>
+    </header>
+
+    <main>
+        <button id="viewTasks" class="button"><i class="fas fa-calendar-day"></i>Voir ce qui passe dans ce jour</button>
+
+        <div id="daySelection" class="day-selection">
+            <label for="dayDropdown">Sélectionnez un jour:</label>
+            <select id="dayDropdown"></select>
+        </div>
+
+        <div id="result" class="result">
+            <h2>Tâches pour le <span id="resultDay"></span></h2>
+            <p id="taskContent"></p>
+        </div>
+    </main>
+
+    <footer>
+        Suivi Quotidien des Tâches
+    </footer>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOA0a_rjXqY99KXyyuHEiPOJDGGapZQUo",
+            authDomain: "suivi-49954.firebaseapp.com",
+            databaseURL: "https://suivi-49954-default-rtdb.firebaseio.com",
+            projectId: "suivi-49954",
+            storageBucket: "suivi-49954.appspot.com",
+            messagingSenderId: "141836603566",
+            appId: "1:141836603566:web:aaff934468238d958cdd3f",
+            measurementId: "G-3CMYEPPYK8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const days = [
+            ...Array(31).keys()
+        ].map(i => `septembre ${i + 1}`).concat([...Array(30).keys()].map(i => `octobre ${i + 1}`));
+
+        const dayDropdown = document.getElementById("dayDropdown");
+        days.forEach(day => {
+            const option = document.createElement("option");
+            option.value = day;
+            option.textContent = day;
+            dayDropdown.appendChild(option);
+        });
+
+        document.getElementById("viewTasks").addEventListener("click", function() {
+            const selectedDay = document.getElementById("dayDropdown").value;
+            get(ref(db, 'days/' + selectedDay))
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        document.getElementById("resultDay").textContent = selectedDay;
+                        document.getElementById("taskContent").textContent = data.tasks;
+                        document.getElementById("result").style.display = "block";
+                    } else {
+                        alert("Aucune donnée trouvée pour ce jour.");
+                    }
+                })
+                .catch(error => alert("Erreur lors de la récupération: " + error.message));
+        });
+    </script>
+
+</body>
+</html>
